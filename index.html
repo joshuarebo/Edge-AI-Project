@@ -2,17 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Face Analysis App</title>
+    <!-- Import TensorFlow.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- Import face-api.js which is built on top of TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #f5f5f5;
             text-align: center;
         }
@@ -23,10 +28,12 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-width: 500px;
             width: 90%;
+            margin: 15px;
         }
         h1 {
             color: #333;
             margin-bottom: 10px;
+            font-size: 1.8rem;
         }
         p {
             color: #666;
@@ -39,7 +46,7 @@
             text-align: left;
         }
         .feature-icon {
-            width: 40px;
+            min-width: 40px;
             height: 40px;
             background-color: #5C6BC0;
             border-radius: 50%;
@@ -49,24 +56,174 @@
             margin-right: 15px;
             color: white;
             font-weight: bold;
+            flex-shrink: 0;
         }
         .button {
             background-color: #5C6BC0;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 10px;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 250px;
+            transition: background-color 0.3s;
         }
-        .button:hover {
+        .button:hover, .button:active {
             background-color: #3F51B5;
+        }
+        #loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #5C6BC0;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #camera-container {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #video {
+            width: 100%;
+            height: auto;
+            background-color: #000;
+            border-radius: 8px;
+        }
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            color: #5C6BC0;
+            border: 2px solid #5C6BC0;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            z-index: 10;
+        }
+        #result-container {
+            display: none;
+            margin-top: 20px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .result-box {
+            background-color: #eef2ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #3F51B5;
+        }
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 500px;
+            margin-top: 15px;
+        }
+        .toolbar-btn {
+            background-color: #eef2ff;
+            color: #5C6BC0;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #face-status {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #333;
+            z-index: 10;
+        }
+        #camera-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #5C6BC0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            z-index: 10;
+            cursor: pointer;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .feature-icon {
+                min-width: 35px;
+                height: 35px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="loading-container">
+        <div class="spinner"></div>
+        <p>Loading face detection models...</p>
+    </div>
+
+    <div class="container" id="main-container">
         <h1>Face Analysis App</h1>
         <p>Edge-based AI for age, gender, and expression recognition</p>
         
@@ -94,12 +251,324 @@
             </div>
         </div>
         
-        <button class="button" id="startBtn">Start Demo</button>
+        <button class="button" id="startBtn">Start Camera</button>
+    </div>
+
+    <div id="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        <div id="face-status">No face detected</div>
+        <button id="capture-btn">📷</button>
+        <button id="camera-switch">🔄</button>
+    </div>
+
+    <div id="result-container">
+        <div class="result-box">
+            <div class="result-title">Age Estimation</div>
+            <div id="age-result">Loading...</div>
+        </div>
+        <div class="result-box">
+            <div class="result-title">Gender</div>
+            <div id="gender-result">Loading...</div>
+        </div>
+        <div class="result-box">
+            <div class="result-title">Expression</div>
+            <div id="expression-result">Loading...</div>
+        </div>
+        <button class="button" id="back-btn">Try Again</button>
     </div>
 
     <script>
-        document.getElementById('startBtn').addEventListener('click', function() {
-            alert('This is a simple web-based version of the Face Analysis App.\nThe full app would include camera access and real-time AI processing.');
+        // DOM Elements
+        const loadingContainer = document.getElementById('loading-container');
+        const mainContainer = document.getElementById('main-container');
+        const startBtn = document.getElementById('startBtn');
+        const cameraContainer = document.getElementById('camera-container');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const faceStatus = document.getElementById('face-status');
+        const captureBtn = document.getElementById('capture-btn');
+        const resultContainer = document.getElementById('result-container');
+        const backBtn = document.getElementById('back-btn');
+        
+        // Results elements
+        const ageResult = document.getElementById('age-result');
+        const genderResult = document.getElementById('gender-result');
+        const expressionResult = document.getElementById('expression-result');
+        
+        // Global variables
+        let isModelLoaded = false;
+        let stream = null;
+        let detectInterval = null;
+        let currentDetection = null;
+        
+        // Load face-api models
+        async function loadModels() {
+            try {
+                // Specify the models to load
+                await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
+                await faceapi.nets.ageGenderNet.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
+                await faceapi.nets.faceExpressionNet.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
+                
+                isModelLoaded = true;
+                loadingContainer.style.display = 'none';
+                console.log('Models loaded successfully');
+            } catch (error) {
+                console.error('Error loading models:', error);
+                loadingContainer.innerHTML = `
+                    <p>Error loading face detection models.</p>
+                    <button class="button" onclick="location.reload()">Try Again</button>
+                `;
+            }
+        }
+        
+        // Global variables
+        let currentFacingMode = 'user'; // 'user' for front camera, 'environment' for back camera
+        
+        // Detect if device is mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Event Listeners
+        startBtn.addEventListener('click', startCamera);
+        captureBtn.addEventListener('click', captureImage);
+        backBtn.addEventListener('click', resetApp);
+        
+        // Add camera switch button if on mobile device
+        const cameraSwitchBtn = document.getElementById('camera-switch');
+        if (isMobile && cameraSwitchBtn) {
+            cameraSwitchBtn.addEventListener('click', switchCamera);
+            cameraSwitchBtn.style.display = 'flex';
+        } else if (cameraSwitchBtn) {
+            cameraSwitchBtn.style.display = 'none';
+        }
+        
+        // Start loading models immediately
+        loadModels();
+        
+        // Function to switch between front and back cameras
+        async function switchCamera() {
+            if (!isMobile) return;
+            
+            // Stop current stream
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                stream = null;
+            }
+            
+            // Toggle facing mode
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            
+            try {
+                // Start new stream with toggled camera
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                
+                // Update video source
+                video.srcObject = stream;
+                
+                // Reset face detection
+                currentDetection = null;
+                
+                // Wait for video to be ready
+                video.onloadedmetadata = () => {
+                    // Set canvas dimensions to match video
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                };
+            } catch (error) {
+                console.error('Error switching camera:', error);
+                alert('Could not switch camera. Your device may not support multiple cameras.');
+                
+                // Try to revert to the previous camera
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                startCamera();
+            }
+        }
+        
+        // Start camera function
+        async function startCamera() {
+            try {
+                // Check if models are loaded
+                if (!isModelLoaded) {
+                    alert('Face detection models are still loading. Please wait.');
+                    return;
+                }
+                
+                // Check if camera is supported
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('Camera access is not supported by this browser');
+                    return;
+                }
+                
+                // Request camera access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                // Set video source to camera stream
+                video.srcObject = stream;
+                
+                // Wait for video to be ready
+                video.onloadedmetadata = () => {
+                    // Show camera view, hide main container
+                    mainContainer.style.display = 'none';
+                    cameraContainer.style.display = 'block';
+                    
+                    // Set canvas dimensions to match video
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    
+                    // Start face detection
+                    startFaceDetection();
+                };
+                
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                alert('Could not access the camera. Please allow camera access and try again.');
+            }
+        }
+        
+        // Start face detection loop
+        function startFaceDetection() {
+            // Clear any existing interval
+            if (detectInterval) clearInterval(detectInterval);
+            
+            // Set up detection interval
+            detectInterval = setInterval(async () => {
+                if (video.readyState === 4) {
+                    try {
+                        // Detect faces
+                        const detections = await faceapi.detectAllFaces(
+                            video, 
+                            new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 })
+                        )
+                        .withAgeAndGender()
+                        .withFaceExpressions();
+                    
+                    // If no faces detected
+                    if (detections.length === 0) {
+                        faceStatus.textContent = 'No face detected';
+                        faceStatus.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                        currentDetection = null;
+                        
+                        // Clear canvas
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        return;
+                    }
+                    
+                    // Get the largest face (closest to camera)
+                    const mainFace = detections.sort((a, b) => b.detection.box.area - a.detection.box.area)[0];
+                    currentDetection = mainFace;
+                    
+                    // Update face status
+                    faceStatus.textContent = 'Face detected';
+                    faceStatus.style.backgroundColor = 'rgba(92, 107, 192, 0.8)';
+                    faceStatus.style.color = 'white';
+                    
+                    // Draw face detection box
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw rectangle around face
+                    const { x, y, width, height } = mainFace.detection.box;
+                    ctx.strokeStyle = '#5C6BC0';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x, y, width, height);
+                    } catch (error) {
+                        console.error('Error in face detection:', error);
+                        // Continue running even if there's an error
+                    }
+                }
+            }, 100);
+        }
+        
+        // Capture image and process it
+        function captureImage() {
+            // Check if a face is detected
+            if (!currentDetection) {
+                alert('No face detected. Please position your face in the camera view.');
+                return;
+            }
+            
+            // Stop face detection interval
+            if (detectInterval) clearInterval(detectInterval);
+            
+            // Hide camera container, show results
+            cameraContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            // Process the face detection results
+            processResults(currentDetection);
+            
+            // Stop the camera stream
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                stream = null;
+            }
+        }
+        
+        // Process face detection results
+        function processResults(detection) {
+            // Age result
+            const age = Math.round(detection.age);
+            let ageRange = '';
+            
+            if (age < 18) ageRange = 'Under 18';
+            else if (age >= 18 && age <= 24) ageRange = '18-24';
+            else if (age >= 25 && age <= 32) ageRange = '25-32';
+            else if (age >= 33 && age <= 40) ageRange = '33-40';
+            else if (age >= 41 && age <= 50) ageRange = '41-50';
+            else if (age >= 51 && age <= 60) ageRange = '51-60';
+            else ageRange = 'Above 60';
+            
+            ageResult.textContent = ageRange + ' (estimated: ' + age + ' years)';
+            
+            // Gender result
+            const genderProbability = Math.round(detection.genderProbability * 100);
+            genderResult.textContent = detection.gender + ' (' + genderProbability + '% confidence)';
+            
+            // Expression result
+            const expressions = detection.expressions;
+            const expressionEntries = Object.entries(expressions);
+            const topExpression = expressionEntries.sort((a, b) => b[1] - a[1])[0];
+            const expressionName = topExpression[0].charAt(0).toUpperCase() + topExpression[0].slice(1);
+            const expressionConfidence = Math.round(topExpression[1] * 100);
+            
+            expressionResult.textContent = expressionName + ' (' + expressionConfidence + '% confidence)';
+        }
+        
+        // Reset the app to initial state
+        function resetApp() {
+            resultContainer.style.display = 'none';
+            mainContainer.style.display = 'block';
+            
+            // Reset results
+            ageResult.textContent = 'Loading...';
+            genderResult.textContent = 'Loading...';
+            expressionResult.textContent = 'Loading...';
+            
+            // Clear detection data
+            currentDetection = null;
+        }
+        
+        // Handle window resize to ensure canvas fits video
+        window.addEventListener('resize', () => {
+            if (video.readyState === 4) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
         });
     </script>
 </body>
