@@ -1,0 +1,80 @@
+**Project Title:** Edge-Based Age, Gender, and Expression Recognition Application
+
+**Objective:**
+Develop a mobile application capable of recognizing age, gender, and facial expression in real time using edge computing. The application should be deployable on a mobile device or tablet, ensuring minimal dependency on cloud computing to optimize latency and privacy.
+
+---
+
+### **Technological Stack & Requirements**
+
+#### **Hardware Requirements:**
+
+- Development Laptop: Windows-based CPU machine
+- Mobile Device: Android/iOS smartphone or tablet (Edge deployment target)
+- External GPU (Optional for model training via Google Colab or Kaggle)
+
+#### **Software Requirements:**
+
+- **OS:** Windows 10/11 (for development)
+- **Programming Language:** Python
+- **Deep Learning Framework:** TensorFlow Lite / PyTorch Mobile
+- **Pre-trained Models:** MobileNetV2, EfficientNet, or any lightweight CNN model fine-tuned for age, gender, and expression recognition
+- **Model Training & Evaluation:** Google Colab/Kaggle (for GPU support) and local CPU training for baseline comparison
+- **Dataset:** Adience Dataset (for age & gender) + AffectNet (for expression recognition)
+- **Mobile App Development:** Flutter/Dart or React Native for cross-platform support
+- **Edge Deployment:** TensorFlow Lite, ONNX Runtime Mobile, or OpenVINO
+- **Performance Evaluation Metrics:** Accuracy, Precision, Recall, F1-score, Inference Time
+- **Testing & Benchmarking:** Profiling on mobile device (inference time, FPS, latency)
+- **Version Control:** GitHub/GitLab
+
+---
+
+### **Implementation Plan**
+
+#### **Phase 1: Data Preparation & Model Training**
+
+1. Collect a dataset with at least 20 images from the mobile device (balanced for age, gender, and expression).
+2. Preprocess images: Resize, normalize, and augment for better generalization.
+3. Train deep learning models using Google Colab/Kaggle for GPU support.
+4. Evaluate performance on CPU vs. GPU.
+5. Convert the trained model to a lightweight format (TensorFlow Lite/ONNX/OpenVINO).
+
+#### **Phase 2: Edge Deployment & Mobile App Development**
+
+6. Develop a mobile app using Flutter or React Native.
+7. Integrate the lightweight model into the mobile application.
+8. Optimize model inference using on-device acceleration (NNAPI for Android, Core ML for iOS).
+9. Deploy the app to a mobile device and test real-time performance.
+
+#### **Phase 3: Evaluation & Reporting**
+
+10. Measure inference speed and accuracy on the edge device.
+11. Compare performance metrics (CPU vs. GPU vs. Edge device) in tabular format.
+12. Document findings and report performance evaluation.
+
+---
+
+### **Prompt for AI Tool to Generate the Project**
+
+**Prompt:**
+"Develop an edge-based mobile application for real-time age, gender, and expression recognition. The application should:
+
+- Use TensorFlow Lite, ONNX Runtime, or OpenVINO for model inference on a mobile device.
+- Be trained using Google Colab/Kaggle (leveraging GPU) and benchmarked on a Windows CPU.
+- Be implemented in a cross-platform mobile framework (Flutter/Dart or React Native).
+- Collect 20 real-world images for evaluation.
+- Report performance on CPU vs. GPU vs. Edge deployment.
+- Optimize model inference for real-time execution on a smartphone.
+- Provide well-documented source code and a final performance evaluation report."
+
+---
+
+### **Deliverables:**
+
+1. Trained deep learning model (TensorFlow Lite/ONNX/OpenVINO format).
+2. Mobile application with integrated model inference.
+3. Source code repository with documentation.
+4. Performance comparison table (CPU, GPU, and Edge device results).
+5. Final project report including implementation details, challenges, and findings.
+6. Gantt chart for project tracking (optional but recommended).
+
