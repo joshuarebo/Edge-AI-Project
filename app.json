@@ -5,13 +5,18 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#5C6BC0"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -20,7 +25,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.facialinsight.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to analyze facial features for age, gender, and emotion recognition."
+        "NSCameraUsageDescription": "This app uses the camera to analyze facial features for age, gender, and emotion recognition.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save the analyzed facial images if you choose to."
       }
     },
     "android": {
@@ -29,10 +35,11 @@
         "backgroundColor": "#5C6BC0"
       },
       "package": "com.facialinsight.app",
-      "permissions": ["CAMERA"]
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "plugins": [
       [
@@ -42,6 +49,11 @@
         }
       ]
     ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    },
     "description": "Edge-based mobile application for real-time age, gender, and facial expression recognition using TensorFlow.js and React Native."
   }
 }
