@@ -16,6 +16,7 @@ const Stats = ({ stats }) => {
   // Calculate averages
   const avgInferenceTime = stats.reduce((sum, stat) => sum + stat.inferenceTime, 0) / stats.length;
   const avgFps = stats.length > 0 ? 1000 / avgInferenceTime : 0;
+  const avgCpuUtilization = stats.reduce((sum, stat) => sum + (stat.cpuUtilization || 0), 0) / stats.length;
   
   // Calculate max and min inference times
   const maxInferenceTime = Math.max(...stats.map(stat => stat.inferenceTime));
@@ -50,6 +51,13 @@ const Stats = ({ stats }) => {
           <View style={styles.metricItem}>
             <Text style={styles.metricValue}>{maxInferenceTime.toFixed(2)} ms</Text>
             <Text style={styles.metricLabel}>Max Inference</Text>
+          </View>
+        </View>
+
+        <View style={styles.metricsContainer}>
+          <View style={styles.metricItem}>
+            <Text style={styles.metricValue}>{avgCpuUtilization.toFixed(1)}%</Text>
+            <Text style={styles.metricLabel}>Avg. CPU Usage</Text>
           </View>
         </View>
       </View>

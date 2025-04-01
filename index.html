@@ -503,6 +503,9 @@
             const genderAccuracy = Math.round(modelAccuracy.gender * 100);
             const expressionAccuracy = Math.round(modelAccuracy.expression * 100);
             
+            // Calculate CPU utilization (simulated based on processing time)
+            const cpuUtilization = Math.round((processingTime / totalTime) * 100);
+            
             let performanceText = `
                 <strong>Device Information:</strong><br>
                 Device: ${deviceInfo}<br>
@@ -511,6 +514,7 @@
                 Image capture: ${captureTime}ms<br>
                 Image processing: ${processingTime}ms<br>
                 Total processing time: ${totalTime}ms<br>
+                CPU utilization: ${cpuUtilization}%<br>
                 <br>
                 <strong>Model Accuracy:</strong><br>
                 Age model: ${ageAccuracy}% (Adience dataset)<br>
