@@ -1,21 +1,20 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
-import * as tf from '@tensorflow/tfjs';
-import { loadModels as loadModelsUtil, downloadModelsIfNeeded } from '../utils/modelLoader';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
+import { loadModels as loadModelsUtil } from '../utils/modelLoader';
 
 // Create context
 export const ModelContext = createContext();
 
 /**
  * Provider component that wraps the app to provide model access
- * This is a simplified version that will be expanded later
+ * This is a simplified version for initial testing
  */
 export const ModelProvider = ({ children }) => {
   // State
   const [models, setModels] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // Initialize TensorFlow.js and load models
+  // Initialize and load mock models
   const loadModels = useCallback(async () => {
     if (Object.keys(models).length > 0) {
       return models; // Models already loaded
@@ -25,27 +24,27 @@ export const ModelProvider = ({ children }) => {
       setIsLoading(true);
       setError(null);
       
-      // Initialize TensorFlow.js
-      await tf.ready();
-      console.log('TensorFlow.js initialized');
+      console.log('Loading mock models...');
       
-      // Check if models need to be downloaded
-      await downloadModelsIfNeeded();
-      
-      // Load models
+      // Load mock models
       const loadedModels = await loadModelsUtil();
-      console.log('Models loaded:', Object.keys(loadedModels));
+      console.log('Mock models loaded successfully');
       
       setModels(loadedModels);
       return loadedModels;
     } catch (err) {
-      console.error('Error loading models:', err);
+      console.error('Error loading mock models:', err);
       setError(err.message);
       return {};
     } finally {
       setIsLoading(false);
     }
   }, [models]);
+  
+  // Load models on mount
+  useEffect(() => {
+    loadModels();
+  }, [loadModels]);
   
   // Context value
   const contextValue = {

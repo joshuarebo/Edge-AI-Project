@@ -1,0 +1,9 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#5C6BC0"/>
+  <text x="512" y="480" font-family="Arial" font-size="72" fill="white" text-anchor="middle">FacialInsight</text>
+  <text x="512" y="560" font-family="Arial" font-size="36" fill="white" text-anchor="middle">AI-Powered Face Analysis</text>
+  <path d="M512 304C626.91 304 720 397.09 720 512C720 626.91 626.91 720 512 720C397.09 720 304 626.91 304 512C304 397.09 397.09 304 512 304Z" stroke="white" stroke-width="8"/>
+  <circle cx="448" cy="464" r="24" fill="white"/>
+  <circle cx="576" cy="464" r="24" fill="white"/>
+  <path d="M448 560C480 592 544 592 576 560" stroke="white" stroke-width="8" stroke-linecap="round"/>
+</svg>
