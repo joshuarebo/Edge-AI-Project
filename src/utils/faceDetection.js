@@ -14,33 +14,29 @@ export const processImage = async (photo, face, models) => {
   console.log('Processing image for face analysis');
   
   try {
+    const startTime = Date.now();
+    
     // In a real implementation:
     // 1. Crop the face from the image
-    // 2. Prepare the face image as tensor for model input
-    // 3. Run inferences on the three models
-    // 4. Process and format the results
+    const croppedFace = await cropFaceFromImage(photo, face);
     
-    // For now, we return mock results
+    // 2. Prepare the face image as tensor for model input
+    const tensor = await imageToTensor(croppedFace.uri);
+    
+    // 3. Run inferences on the three models
+    const ageResult = await predictAge(tensor, models?.age);
+    const genderResult = await predictGender(tensor, models?.gender);
+    const expressionResult = await predictExpression(tensor, models?.expression);
+    
+    // 4. Calculate processing time
+    const processingTime = Date.now() - startTime;
+    
+    // 5. Format results for display
     return {
-      age: {
-        value: '25-32',
-        confidence: 0.85
-      },
-      gender: {
-        value: 'male',
-        confidence: 0.92
-      },
-      expression: {
-        value: 'happy',
-        confidence: 0.78
-      },
-      inferenceTime: {
-        total: 320,  // ms
-        faceDetection: 150,
-        ageModel: 60,
-        genderModel: 50,
-        expressionModel: 60
-      }
+      age: `${ageResult.ageClass} (${(ageResult.confidence * 100).toFixed(1)}%)`,
+      gender: `${genderResult.gender} (${(genderResult.confidence * 100).toFixed(1)}%)`,
+      expression: `${expressionResult.expression} (${(expressionResult.confidence * 100).toFixed(1)}%)`,
+      processingTime: processingTime
     };
   } catch (error) {
     console.error('Error processing face image:', error);
@@ -85,11 +81,26 @@ export const imageToTensor = async (uri) => {
 export const predictAge = async (tensor, model) => {
   console.log('Running age prediction');
   
-  // Mock prediction
+  // Age ranges that correspond to our model's output classes
+  const ageRanges = [
+    '0-3',
+    '4-7',
+    '8-15',
+    '16-24',
+    '25-32',
+    '33-45',
+    '46-60',
+    '60+'
+  ];
+  
+  // Mock prediction - in a real app this would come from the model
+  const classIndex = 4; // Corresponds to 25-32 age range
+  const confidence = 0.85;
+  
   return {
-    ageClass: 3, // 25-32 age bracket
-    confidence: 0.85,
-    rawOutput: [0.03, 0.07, 0.12, 0.85, 0.1, 0.05, 0.02, 0.01]
+    ageClass: ageRanges[classIndex],
+    confidence: confidence,
+    rawOutput: [0.03, 0.07, 0.12, 0.25, 0.85, 0.1, 0.05, 0.02]
   };
 };
 
@@ -119,11 +130,26 @@ export const predictGender = async (tensor, model) => {
 export const predictExpression = async (tensor, model) => {
   console.log('Running expression prediction');
   
+  // Expression classes that correspond to our model's output
+  const expressions = [
+    'angry',
+    'disgust',
+    'fear',
+    'happy',
+    'sad',
+    'surprise',
+    'neutral'
+  ];
+  
   // Mock prediction for expressions
   // Classes: 0=angry, 1=disgust, 2=fear, 3=happy, 4=sad, 5=surprise, 6=neutral
+  const classIndex = 3; // Happy
+  const confidence = 0.78;
+  const rawOutput = [0.03, 0.02, 0.05, 0.78, 0.04, 0.03, 0.05];
+  
   return {
-    expression: 'happy', 
-    confidence: 0.78,
-    rawOutput: [0.03, 0.02, 0.05, 0.78, 0.04, 0.03, 0.05]
+    expression: expressions[classIndex], 
+    confidence: confidence,
+    rawOutput: rawOutput
   };
 };

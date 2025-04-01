@@ -4,10 +4,12 @@
     "slug": "facial-insight",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon.svg",
     "userInterfaceStyle": "light",
     "splash": {
-      "backgroundColor": "#ffffff"
+      "image": "./assets/icon.svg",
+      "resizeMode": "contain",
+      "backgroundColor": "#4a6bff"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

@@ -12,9 +12,10 @@ import {
 
 // Import our components, hooks, and utilities
 import AppNavigator from './src/navigation/AppNavigator';
+import CameraComponent from './src/components/Camera';
 import { ModelProvider } from './src/context/ModelContext';
 import { useTensorFlowModel } from './src/hooks/useTensorFlowModel';
-import { commonStyles, colors, spacing, typography } from './src/styles/globalStyles';
+import { commonStyles, colors, spacing, typography, layout } from './src/styles/globalStyles';
 
 // Home screen component
 const HomeScreen = ({ onStartPress }) => (
@@ -51,16 +52,15 @@ const HomeScreen = ({ onStartPress }) => (
   </ScrollView>
 );
 
-// Camera screen component (placeholder for now)
+// Camera screen component
 const CameraScreen = ({ onBackPress }) => (
-  <View style={styles.cameraPlaceholder}>
-    <Text style={styles.placeholderText}>Camera functionality coming soon</Text>
-    <Text style={styles.placeholderSubText}>We're working on implementing camera access</Text>
+  <View style={styles.cameraContainer}>
+    <CameraComponent />
     <TouchableOpacity 
-      style={[styles.button, {marginTop: 30}]}
+      style={styles.backButton}
       onPress={onBackPress}
     >
-      <Text style={styles.buttonText}>Back to Home</Text>
+      <Text style={styles.backButtonText}>← Back</Text>
     </TouchableOpacity>
   </View>
 );
@@ -225,23 +225,24 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSizes.md,
     fontWeight: typography.fontWeights.bold,
   },
-  cameraPlaceholder: {
+  cameraContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.md,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.dark,
   },
-  placeholderText: {
-    fontSize: typography.fontSizes.xl,
-    fontWeight: typography.fontWeights.bold,
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: layout.borderRadius.md,
+    zIndex: 10,
+  },
+  backButtonText: {
     color: colors.white,
-    marginBottom: spacing.sm,
-  },
-  placeholderSubText: {
     fontSize: typography.fontSizes.md,
-    color: colors.gray[300],
-    textAlign: 'center',
+    fontWeight: typography.fontWeights.medium,
   },
   subTitle: {
     fontSize: typography.fontSizes.xl,

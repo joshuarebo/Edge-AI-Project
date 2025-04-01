@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Camera } from 'expo-camera';
 
 /**
  * Custom hook to manage camera functionality
@@ -6,8 +7,8 @@ import { useState, useEffect, useRef } from 'react';
  */
 export const useCamera = () => {
   const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState('front'); // front or back camera
-  const [flash, setFlash] = useState('off'); // off, on, auto
+  const [type, setType] = useState(Camera.Constants.Type.front);
+  const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastPhoto, setLastPhoto] = useState(null);
   const cameraRef = useRef(null);
@@ -15,9 +16,17 @@ export const useCamera = () => {
   // Request camera permissions on mount
   useEffect(() => {
     const getCameraPermissions = async () => {
-      // This would be implemented with Expo Camera permissions
-      // For now, just simulate a successful permission
-      setHasPermission(true);
+      try {
+        const { status } = await Camera.requestCameraPermissionsAsync();
+        setHasPermission(status === 'granted');
+        
+        if (status !== 'granted') {
+          console.log('Camera permission denied');
+        }
+      } catch (err) {
+        console.error('Error requesting camera permissions:', err);
+        setHasPermission(false);
+      }
     };
 
     getCameraPermissions();
@@ -27,17 +36,23 @@ export const useCamera = () => {
    * Toggle between front and back camera
    */
   const toggleCameraType = () => {
-    setType(current => (current === 'front' ? 'back' : 'front'));
+    setType(current => 
+      current === Camera.Constants.Type.front 
+        ? Camera.Constants.Type.back 
+        : Camera.Constants.Type.front
+    );
   };
 
   /**
    * Toggle flash mode
    */
-  const toggleFlash = () => {
-    setFlash(current => {
-      if (current === 'off') return 'on';
-      if (current === 'on') return 'auto';
-      return 'off';
+  const toggleFlashMode = () => {
+    setFlashMode(current => {
+      if (current === Camera.Constants.FlashMode.off) 
+        return Camera.Constants.FlashMode.on;
+      if (current === Camera.Constants.FlashMode.on) 
+        return Camera.Constants.FlashMode.auto;
+      return Camera.Constants.FlashMode.off;
     });
   };
 
@@ -49,22 +64,17 @@ export const useCamera = () => {
     if (cameraRef.current && !isProcessing) {
       try {
         setIsProcessing(true);
-        
-        // This would use actual camera API in a real implementation
         console.log('Taking picture...');
         
-        // Simulate photo capture
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Actual camera capture
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+          base64: false,
+          skipProcessing: false,
+          exif: true
+        });
         
-        // Mock photo object
-        const photo = {
-          uri: 'https://example.com/mock-photo.jpg',
-          width: 1080,
-          height: 1920,
-          exif: {},
-          base64: null
-        };
-        
+        console.log('Picture taken:', photo.uri);
         setLastPhoto(photo);
         setIsProcessing(false);
         return photo;
@@ -73,19 +83,27 @@ export const useCamera = () => {
         setIsProcessing(false);
         throw error;
       }
+    } else {
+      if (!cameraRef.current) {
+        console.error('Camera reference is not available');
+      }
+      if (isProcessing) {
+        console.log('Camera is already processing');
+      }
+      throw new Error('Cannot take picture at this time');
     }
   };
 
   return {
     hasPermission,
     type,
-    flash,
+    flashMode,
     isProcessing,
     lastPhoto,
     cameraRef,
     takePicture,
     toggleCameraType,
-    toggleFlash,
+    toggleFlashMode,
     setLastPhoto
   };
 };
