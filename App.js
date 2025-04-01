@@ -1,31 +1,21 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { View, Text } from 'react-native';
 
+// Super minimal app with no dependencies to avoid timeout issues
 export default function App() {
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      <Text style={styles.title}>Face Analysis App</Text>
-      <Text style={styles.subtitle}>Simplified Version for Testing</Text>
+    <View style={{ 
+      flex: 1, 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      backgroundColor: '#ffffff' 
+    }}>
+      <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+        Basic App
+      </Text>
+      <Text style={{ marginTop: 10 }}>
+        Minimal version to bypass timeout issues
+      </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-});
