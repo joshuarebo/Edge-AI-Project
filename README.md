@@ -34,6 +34,8 @@ Access the live demo on Replit: [Face Analysis App](https://Edge-AI-Project.josh
 
 Visit [https://Edge-AI-Project.joshuarebo.repl.co](https://Edge-AI-Project.joshuarebo.repl.co) in your browser.
 
+You can also access the code repository on GitHub: [https://github.com/joshuarebo/Edge-AI-Project](https://github.com/joshuarebo/Edge-AI-Project)
+
 ## How to Use
 
 1. **Start**: Click "Start Camera" to begin
