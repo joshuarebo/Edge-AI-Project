@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Image, 
+  ActivityIndicator,
+  Platform 
+} from 'react-native';
 import { Camera } from 'expo-camera';
 import * as FaceDetector from 'expo-face-detector';
 import { useCamera } from '../hooks/useCamera';
@@ -8,7 +16,26 @@ import { processImage } from '../utils/faceDetection';
 import { colors, spacing, typography, layout } from '../styles/globalStyles';
 
 const CameraComponent = () => {
-  // Use our custom hooks
+  // Check for web platform first - camera features limited on web
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.unsupportedContainer}>
+          <Text style={styles.unsupportedTitle}>
+            Camera Not Supported on Web
+          </Text>
+          <Text style={styles.unsupportedText}>
+            This feature requires a native mobile device. Please open this app on an iOS or Android device to use the camera features.
+          </Text>
+          <Text style={styles.infoText}>
+            The FacialInsight app uses native camera capabilities and on-device AI for face analysis, which aren't available in web browsers.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Use our custom hooks for mobile platforms
   const { 
     hasPermission, 
     cameraRef, 
@@ -232,6 +259,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.dark,
   },
+  // Web-specific styles
+  unsupportedContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  unsupportedTitle: {
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.bold,
+    color: colors.white,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  unsupportedText: {
+    fontSize: typography.fontSizes.md,
+    color: colors.white,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+    lineHeight: 24,
+  },
+  infoText: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.gray[400],
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: spacing.md,
+  },
+  // Mobile camera styles
   camera: {
     flex: 1,
   },

@@ -31,6 +31,18 @@
         "CAMERA"
       ],
       "package": "com.facialinsight.app"
-    }
+    },
+    "web": {
+      "favicon": "./assets/icon.svg"
+    },
+    "platforms": ["ios", "android"],
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow FacialInsight to access your camera to detect and analyze facial characteristics."
+        }
+      ]
+    ]
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
 import { Camera } from 'expo-camera';
 
 /**
@@ -15,6 +16,13 @@ export const useCamera = () => {
 
   // Request camera permissions on mount
   useEffect(() => {
+    // Skip permission request on web as it will be handled in the Camera component
+    if (Platform.OS === 'web') {
+      console.log('Web platform detected - camera may have limited functionality');
+      setHasPermission(false);
+      return;
+    }
+    
     const getCameraPermissions = async () => {
       try {
         const { status } = await Camera.requestCameraPermissionsAsync();
@@ -61,18 +69,31 @@ export const useCamera = () => {
    * @returns {Promise<Object>} The photo data
    */
   const takePicture = async () => {
+    // Prevent taking pictures on web platform
+    if (Platform.OS === 'web') {
+      console.warn('Camera functionality not available on web platform');
+      throw new Error('Camera functionality not available on web platform');
+    }
+    
     if (cameraRef.current && !isProcessing) {
       try {
         setIsProcessing(true);
         console.log('Taking picture...');
         
-        // Actual camera capture
-        const photo = await cameraRef.current.takePictureAsync({
+        // Actual camera capture with platform-specific options
+        const options = {
           quality: 0.8,
           base64: false,
-          skipProcessing: false,
-          exif: true
-        });
+          skipProcessing: Platform.OS === 'android', // Skip processing on Android for better performance
+          exif: true,
+          // Add iOS-specific options
+          ...(Platform.OS === 'ios' ? {
+            orientation: 'portrait',
+            fixOrientation: true,
+          } : {})
+        };
+        
+        const photo = await cameraRef.current.takePictureAsync(options);
         
         console.log('Picture taken:', photo.uri);
         setLastPhoto(photo);

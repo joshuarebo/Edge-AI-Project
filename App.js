@@ -7,7 +7,8 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   ActivityIndicator, 
-  ScrollView 
+  ScrollView,
+  Platform 
 } from 'react-native';
 
 // Import our components, hooks, and utilities
@@ -22,6 +23,16 @@ const HomeScreen = ({ onStartPress }) => (
   <ScrollView style={styles.scrollView}>
     <View style={styles.contentContainer}>
       <Text style={styles.title}>Edge-Based Facial Analysis</Text>
+      
+      {/* Platform compatibility notice for web */}
+      {Platform.OS === 'web' && (
+        <View style={styles.platformNotice}>
+          <Text style={styles.platformNoticeText}>
+            You are using the web version of this app. For full functionality including camera access and face detection, please use the iOS or Android app.
+          </Text>
+        </View>
+      )}
+      
       <Text style={styles.description}>
         This app uses on-device AI to analyze faces for:
       </Text>
@@ -42,6 +53,14 @@ const HomeScreen = ({ onStartPress }) => (
       <Text style={styles.privacyText}>
         Privacy-First: All processing happens on your device - your data stays private.
       </Text>
+      
+      {/* Add platform indicator */}
+      <View style={styles.platformIndicator}>
+        <Text style={styles.platformIndicatorText}>
+          Current Platform: {Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : 'Web'}
+        </Text>
+      </View>
+      
       <TouchableOpacity 
         style={styles.button}
         onPress={onStartPress}
@@ -70,6 +89,16 @@ const AboutScreen = ({ onBackPress }) => (
   <ScrollView style={styles.scrollView}>
     <View style={styles.contentContainer}>
       <Text style={styles.title}>About This App</Text>
+      
+      {/* Platform compatibility notice for web */}
+      {Platform.OS === 'web' && (
+        <View style={styles.platformNotice}>
+          <Text style={styles.platformNoticeText}>
+            You are using the web version of this app. For full functionality including camera access and face detection, please use the iOS or Android app.
+          </Text>
+        </View>
+      )}
+      
       <Text style={styles.description}>
         FacialInsight is an edge-based AI application that processes all data on your device.
         No images are sent to any servers, ensuring your privacy.
@@ -84,6 +113,18 @@ const AboutScreen = ({ onBackPress }) => (
         All processing happens on your device, not in the cloud.
         Your images never leave your phone.
       </Text>
+      
+      <Text style={styles.subTitle}>Platform Compatibility:</Text>
+      <Text style={styles.bulletPoint}>• iOS: Full functionality</Text>
+      <Text style={styles.bulletPoint}>• Android: Full functionality</Text>
+      <Text style={styles.bulletPoint}>• Web: Limited functionality (no camera access)</Text>
+      
+      <View style={styles.platformIndicator}>
+        <Text style={styles.platformIndicatorText}>
+          Current Platform: {Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : 'Web'}
+        </Text>
+      </View>
+      
       <TouchableOpacity 
         style={[styles.button, {marginTop: 30}]}
         onPress={onBackPress}
@@ -175,6 +216,33 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     textAlign: 'center',
     color: colors.dark,
+  },
+  // Platform-specific notice for web
+  platformNotice: {
+    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 193, 7, 0.5)',
+    borderRadius: layout.borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  platformNoticeText: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.gray[800],
+    textAlign: 'center',
+  },
+  // Platform indicator
+  platformIndicator: {
+    marginVertical: spacing.sm,
+    padding: spacing.xs,
+    borderRadius: layout.borderRadius.sm,
+    backgroundColor: colors.gray[200],
+    alignSelf: 'center',
+  },
+  platformIndicatorText: {
+    fontSize: typography.fontSizes.xs,
+    color: colors.gray[600],
+    textAlign: 'center',
   },
   description: {
     fontSize: typography.fontSizes.md,
