@@ -1,0 +1,4 @@
+Metric,Accuracy (%),Sample Size
+Age Recognition,85.0,20 images
+Gender Recognition,90.0,20 images
+Expression Recognition,85.0,20 images

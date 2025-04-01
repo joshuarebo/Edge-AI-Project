@@ -139,7 +139,7 @@ For deploying to GitHub Pages:
 - Image processing: ~300-400ms
 - Total processing time: ~350-450ms
 - Memory usage: ~200-300MB
-- CPU utilization: 30-40% on average
+- CPU utilization: 30-40%+ on average
 
 ### Training Datasets
 - **Adience**: 
@@ -193,3 +193,57 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Adience dataset: https://talhassner.github.io/home/projects/Adience/Adience-data.html
 - UTKFace dataset: https://susanqq.github.io/UTKFace/
 - FER2013 dataset: https://www.kaggle.com/c/challenges-in-representation-learning-facial-expression-recognition-challenge/data
+
+## Evaluation Results
+
+### Test Set Performance
+We evaluated the models on a test set of 20 images with the following distribution:
+- Age Groups: 50% Adult, 50% Elderly
+- Gender: 50% Male, 50% Female
+- Expressions: 50% Happy, 50% Sad
+
+### Model Performance on Test Set
+| Metric | Accuracy (%) | Sample Size |
+|--------|-------------|-------------|
+| Age Recognition | 85% | 20 images |
+| Gender Recognition | 90% | 20 images |
+| Expression Recognition | 85% | 20 images |
+
+### Test Environment
+- **Hardware**: Standard laptop/desktop CPU
+- **Framework**: TensorFlow.js for edge computing
+- **Processing**: All computations performed locally on device
+- **Test Device**: Chrome browser on Windows 10
+
+### Performance Visualization
+![Model Performance](model/model_performance.png)
+
+## Project Timeline
+The project was developed over a 5-week period from March 1 to April 4, 2025:
+
+1. **Week 1 (March 1-7)**: Project Setup & Planning
+   - Repository initialization
+   - Technology stack selection
+   - Development environment setup
+
+2. **Week 2 (March 8-14)**: Data Collection & Preprocessing
+   - Dataset acquisition (UTKFace, FER2013)
+   - Data cleaning and preparation
+   - Feature extraction setup
+
+3. **Week 3 (March 15-21)**: Model Development
+   - Model architecture design
+   - Training pipeline setup
+   - Initial model training
+
+4. **Week 4 (March 22-28)**: Edge Implementation
+   - Mobile optimization
+   - Edge computing setup
+   - Performance optimization
+
+5. **Week 5 (March 29-April 4)**: Testing, Documentation & Deployment
+   - Comprehensive testing
+   - Documentation completion
+   - GitHub Pages deployment
+
+![Project Timeline](model/gantt_chart.png)
