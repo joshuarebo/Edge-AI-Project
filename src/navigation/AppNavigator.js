@@ -1,42 +1,37 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, typography, spacing } from '../styles/globalStyles';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { colors, spacing, typography } from '../styles/globalStyles';
 
-// Simple tab-based navigation without external navigation libraries
 export const AppNavigator = ({ activeTab, setActiveTab, children }) => {
+  // Tab item component
+  const TabItem = ({ name, label, icon }) => (
+    <TouchableOpacity
+      style={[
+        styles.tabItem,
+        activeTab === name && styles.activeTabItem,
+      ]}
+      onPress={() => setActiveTab(name)}
+    >
+      <Text style={styles.tabIcon}>{icon}</Text>
+      <Text
+        style={[
+          styles.tabLabel,
+          activeTab === name && styles.activeTabLabel,
+        ]}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        {children}
-      </View>
+      <View style={styles.content}>{children}</View>
+
       <View style={styles.tabBar}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'home' && styles.activeTab]} 
-          onPress={() => setActiveTab('home')}
-        >
-          <Text style={[
-            styles.tabText, 
-            activeTab === 'home' && styles.activeTabText
-          ]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'camera' && styles.activeTab]} 
-          onPress={() => setActiveTab('camera')}
-        >
-          <Text style={[
-            styles.tabText, 
-            activeTab === 'camera' && styles.activeTabText
-          ]}>Camera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'about' && styles.activeTab]} 
-          onPress={() => setActiveTab('about')}
-        >
-          <Text style={[
-            styles.tabText, 
-            activeTab === 'about' && styles.activeTabText
-          ]}>About</Text>
-        </TouchableOpacity>
+        <TabItem name="history" label="History" icon="📊" />
+        <TabItem name="camera" label="Camera" icon="📷" />
+        <TabItem name="settings" label="Settings" icon="⚙️" />
       </View>
     </View>
   );
@@ -45,7 +40,6 @@ export const AppNavigator = ({ activeTab, setActiveTab, children }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light,
   },
   content: {
     flex: 1,
@@ -53,26 +47,27 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
     borderTopWidth: 1,
-    borderTopColor: colors.gray[300],
-    backgroundColor: colors.white,
+    borderTopColor: colors.border,
+    backgroundColor: colors.background,
   },
-  tab: {
+  tabItem: {
     flex: 1,
-    paddingVertical: spacing.md,
     alignItems: 'center',
+    padding: spacing.sm,
   },
-  activeTab: {
-    borderTopWidth: 3,
-    borderTopColor: colors.primary,
+  activeTabItem: {
+    backgroundColor: colors.primaryLight,
   },
-  tabText: {
-    fontSize: typography.fontSizes.sm,
-    color: colors.gray[600],
+  tabIcon: {
+    fontSize: 24,
+    marginBottom: spacing.xs,
   },
-  activeTabText: {
+  tabLabel: {
+    ...typography.caption,
+    color: colors.textLight,
+  },
+  activeTabLabel: {
     color: colors.primary,
-    fontWeight: typography.fontWeights.bold,
+    fontWeight: 'bold',
   },
 });
-
-export default AppNavigator;

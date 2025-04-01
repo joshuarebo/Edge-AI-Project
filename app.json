@@ -4,12 +4,11 @@
     "slug": "facial-insight",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.svg",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/icon.svg",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#4a6bff"
+      "backgroundColor": "#5C6BC0"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -19,30 +18,30 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.facialinsight.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to detect and analyze facial characteristics for age, gender, and expression recognition."
+        "NSCameraUsageDescription": "This app uses the camera to analyze facial features for age, gender, and emotion recognition."
       }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5C6BC0"
       },
-      "permissions": [
-        "CAMERA"
-      ],
-      "package": "com.facialinsight.app"
+      "package": "com.facialinsight.app",
+      "permissions": ["CAMERA"]
     },
     "web": {
-      "favicon": "./assets/icon.svg"
+      "favicon": "./assets/favicon.png"
     },
-    "platforms": ["ios", "android"],
     "plugins": [
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow FacialInsight to access your camera to detect and analyze facial characteristics."
+          "cameraPermission": "This app uses the camera to analyze facial features for age, gender, and emotion recognition."
         }
       ]
-    ]
+    ],
+    "description": "Edge-based mobile application for real-time age, gender, and facial expression recognition using TensorFlow.js and React Native."
   }
 }

@@ -1,78 +1,110 @@
-# Edge-Based Age, Gender, and Expression Recognition Models
+# Model Training and Integration Guide
 
-This directory contains the scripts for training and converting models used in the FacialInsight application. The models are optimized for edge deployment on mobile devices.
+This directory contains scripts for training and integrating machine learning models for age, gender, and facial expression recognition in the FacialInsight application.
 
-## Model Architecture
+## Directory Structure
 
-All models are based on MobileNetV2, which is designed for mobile and edge devices, with custom top layers for the specific tasks:
+```
+model/
+├── data/                   # Datasets for training
+│   ├── utkface/            # UTKFace dataset for age and gender
+│   └── fer/                # FER2013 dataset for expressions
+├── scripts/                # Utility scripts for data processing
+├── training/               # Training scripts for individual models
+│   ├── age/
+│   ├── gender/
+│   └── expression/
+├── models/                 # Trained model files (created after training)
+├── trainAllModels.js       # Script to train all models
+├── convertModels.js        # Script to convert models for React Native
+└── README.md               # This file
+```
 
-1. **Age Model**: Regression model that predicts age in years
-2. **Gender Model**: Binary classification model that predicts male or female
-3. **Expression Model**: Multi-class classification model that recognizes 7 basic facial expressions (angry, disgust, fear, happy, sad, surprise, neutral)
+## Prerequisites
 
-## Training Process
-
-### Datasets Used
-
-- **Age and Gender**: [Adience Dataset](https://talhassner.github.io/home/projects/Adience/Adience-data.html)
-- **Facial Expression**: [AffectNet](http://mohammadmahoor.com/affectnet/)
-
-### Training Setup
-
-1. Base MobileNetV2 model pre-trained on ImageNet
-2. Transfer learning approach:
-   - Freeze base model layers
-   - Add custom top layers
-   - Train on task-specific data
-3. Optional fine-tuning phase for improved accuracy
-
-## Model Conversion
-
-The models are converted to TensorFlow Lite format for efficient mobile deployment using the `convert_to_tflite.py` script. The conversion process includes:
-
-1. Loading the trained Keras model
-2. Converting to TFLite format
-3. Applying quantization to reduce model size (optional)
-4. Evaluating performance metrics
-
-## Performance Metrics
-
-| Model      | Accuracy | Size (MB) | Quantized Size (MB) | Inference Time (ms) |
-|------------|----------|-----------|---------------------|---------------------|
-| Age        | ~85%     | ~8.5      | ~2.2                | ~120                |
-| Gender     | ~95%     | ~8.5      | ~2.2                | ~120                |
-| Expression | ~70%     | ~8.5      | ~2.2                | ~120                |
-
-*Note: These metrics are estimates and will vary based on device specifications.*
-
-## Usage in Mobile Application
-
-The converted TFLite models are bundled with the FacialInsight application and loaded at startup. The application uses TensorFlow Lite for React Native to perform inference directly on the device.
-
-## Training Your Own Models
-
-To train your own models:
-
-1. Prepare your dataset in the required format
-2. Configure the training parameters in `train_model.py`
-3. Run the training script:
+1. Node.js installed (version 14+)
+2. TensorFlow.js dependencies installed:
    ```
-   python train_model.py
-   ```
-4. Convert the trained models to TFLite format:
-   ```
-   python convert_to_tflite.py
+   npm install @tensorflow/tfjs @tensorflow/tfjs-node fs-extra jimp
    ```
 
-## Optimization Tips
+## Datasets
 
-1. Use quantization to reduce model size
-2. Consider using model pruning for further size reduction
-3. Adjust input image resolution based on device constraints
-4. Use hardware acceleration when available (NNAPI, GPU, etc.)
+Before training, you need to download and prepare the datasets:
 
-## References
+### 1. UTKFace Dataset (for age and gender models)
 
-- [TensorFlow Lite Documentation](https://www.tensorflow.org/lite)
-- [MobileNetV2 Paper](https://arxiv.org/abs/1801.04381)
-- [Transfer Learning Guide](https://www.tensorflow.org/tutorials/images/transfer_learning)
+1. Download from: https://www.kaggle.com/datasets/jangedoo/utkface-new
+2. Extract all images to: `model/data/utkface/`
+
+### 2. FER2013 Dataset (for expression model)
+
+1. Download from: https://www.kaggle.com/competitions/challenges-in-representation-learning-facial-expression-recognition-challenge
+2. Extract all images to: `model/data/fer/`
+
+## Training Models
+
+### Option 1: Train All Models
+
+Run the following command to train all three models:
+
+```
+node model/trainAllModels.js
+```
+
+This will train age, gender, and expression models in sequence. The training process may take several hours depending on your hardware.
+
+### Option 2: Train Individual Models
+
+You can train models individually:
+
+```
+# Train age model
+node model/training/age/trainAgeModel.js
+
+# Train gender model
+node model/training/gender/trainGenderModel.js
+
+# Train expression model
+node model/training/expression/trainExpressionModel.js
+```
+
+## Converting Models for React Native
+
+After training, convert the models for use in React Native:
+
+```
+node model/convertModels.js
+```
+
+This will:
+1. Convert the models to TensorFlow.js format
+2. Copy the model files to the app's assets directory
+3. Create a model mapping file for easy reference in the app
+
+## Integration with the App
+
+The converted models will be available in the `assets/models/` directory. The React Native app can load these models using TensorFlow.js.
+
+## Model Details
+
+### Age Model
+- Architecture: CNN based on MobileNet
+- Input: 224x224x3 RGB images
+- Output: 7 age ranges (0-10, 11-20, 21-30, 31-40, 41-50, 51-60, 61+)
+
+### Gender Model
+- Architecture: Lightweight CNN
+- Input: 224x224x3 RGB images
+- Output: 2 classes (Male, Female)
+
+### Expression Model
+- Architecture: Specialized CNN for facial expressions
+- Input: 48x48x1 grayscale images
+- Output: 7 emotions (Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral)
+
+## Troubleshooting
+
+- **Memory Issues**: If you encounter memory errors during training, try reducing the batch size in `model/scripts/dataProcessing.js`
+- **Dataset Format**: Ensure images are in supported formats (JPG, PNG)
+- **Model Loading Errors**: Check that the model paths in `model_mapping.json` are correct

@@ -7,19 +7,10 @@ to reduce model size and improve inference speed.
 """
 
 import os
-import tensorflow as tf
+import argparse
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import load_model
-import matplotlib.pyplot as plt
-
-# Configuration
-MODEL_DIR = 'models'
-OUTPUT_DIR = 'tflite_models'
-INPUT_SIZE = (224, 224)
-QUANTIZE = True  # Whether to apply quantization
-
-# Create output directory
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def convert_model_to_tflite(model_path, output_path, quantize=False):
     """
@@ -30,24 +21,26 @@ def convert_model_to_tflite(model_path, output_path, quantize=False):
         output_path (str): Path to save the TFLite model
         quantize (bool): Whether to apply quantization
     """
-    # Load the Keras model
+    print(f"Loading model from {model_path}")
     model = load_model(model_path)
-    print(f"Loaded model from {model_path}")
     
-    # Create a converter
+    # Create TFLite converter
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     
-    # Apply optimization if requested
+    # Set optimization options
     if quantize:
+        print("Applying post-training quantization")
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        print("Applying quantization...")
         
-        # Representative dataset for quantization (optional)
-        # This is a placeholder and should be replaced with actual data
+        # For full integer quantization, a representative dataset is needed
         def representative_dataset():
+            # In a real implementation, this would use actual validation data
+            # Here, we just generate some random data of the right shape
             for _ in range(100):
-                data = np.random.rand(1, INPUT_SIZE[0], INPUT_SIZE[1], 3)
-                yield [data.astype(np.float32)]
+                # Get input shape from model
+                input_shape = model.inputs[0].shape
+                # Generate random data
+                yield [np.random.rand(*input_shape).astype(np.float32)]
         
         converter.representative_dataset = representative_dataset
         converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
@@ -55,20 +48,20 @@ def convert_model_to_tflite(model_path, output_path, quantize=False):
         converter.inference_output_type = tf.uint8
     
     # Convert the model
+    print("Converting model to TFLite format")
     tflite_model = converter.convert()
-    print(f"Conversion complete.")
     
     # Save the model
     with open(output_path, 'wb') as f:
         f.write(tflite_model)
     
-    print(f"Model saved to {output_path}")
+    print(f"TFLite model saved to {output_path}")
     
     # Report model size
-    model_size = os.path.getsize(output_path) / (1024 * 1024)  # Size in MB
-    print(f"TFLite model size: {model_size:.2f} MB")
+    tflite_size = os.path.getsize(output_path) / (1024 * 1024)
+    print(f"TFLite model size: {tflite_size:.2f} MB")
     
-    return model_size
+    return output_path
 
 def evaluate_tflite_model(tflite_path, test_images, test_labels):
     """
@@ -92,114 +85,57 @@ def evaluate_tflite_model(tflite_path, test_images, test_labels):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
     
-    # Run inference on test data
-    correct_predictions = 0
-    inference_times = []
-    
-    for i in range(len(test_images)):
-        # Prepare input data
-        input_data = np.expand_dims(test_images[i], axis=0).astype(np.float32)
+    # Run inference on test images
+    correct = 0
+    for i, image in enumerate(test_images):
+        # Preprocess image to match model input
+        input_data = np.expand_dims(image, axis=0).astype(np.float32)
         
-        # Run inference and measure time
-        start_time = tf.timestamp()
+        # Set input tensor
         interpreter.set_tensor(input_details[0]['index'], input_data)
+        
+        # Run inference
         interpreter.invoke()
-        output_data = interpreter.get_tensor(output_details[0]['index'])
-        end_time = tf.timestamp()
         
-        inference_time = (end_time - start_time) * 1000  # ms
-        inference_times.append(inference_time)
+        # Get output
+        output = interpreter.get_tensor(output_details[0]['index'])
         
-        # Check prediction (depends on the model type)
-        # This is a placeholder and should be adapted based on the task
-        predicted_label = np.argmax(output_data)
-        if predicted_label == test_labels[i]:
-            correct_predictions += 1
+        # Get prediction
+        prediction = np.argmax(output)
+        true_label = np.argmax(test_labels[i])
+        
+        if prediction == true_label:
+            correct += 1
     
-    # Calculate metrics
-    accuracy = correct_predictions / len(test_images)
-    avg_inference_time = np.mean(inference_times)
+    # Calculate accuracy
+    accuracy = correct / len(test_images)
     
-    metrics = {
-        'accuracy': accuracy,
-        'avg_inference_time_ms': avg_inference_time,
-        'inference_times': inference_times
-    }
-    
-    print(f"Model accuracy: {accuracy:.4f}")
-    print(f"Average inference time: {avg_inference_time:.2f} ms")
-    
-    return metrics
+    return {'accuracy': accuracy}
 
 def main():
-    # Model paths
-    models = {
-        'age': os.path.join(MODEL_DIR, 'age_model.h5'),
-        'gender': os.path.join(MODEL_DIR, 'gender_model.h5'),
-        'expression': os.path.join(MODEL_DIR, 'expression_model.h5')
-    }
+    parser = argparse.ArgumentParser(description='Convert Keras models to TensorFlow Lite')
+    parser.add_argument('--model-path', type=str, required=True,
+                      help='path to Keras model (.h5)')
+    parser.add_argument('--output-path', type=str, required=True,
+                      help='path to save TFLite model')
+    parser.add_argument('--quantize', action='store_true',
+                      help='apply post-training quantization')
     
-    results = {}
+    args = parser.parse_args()
     
-    # Convert each model
-    for model_name, model_path in models.items():
-        # Skip if model doesn't exist (for testing purposes)
-        if not os.path.exists(model_path):
-            print(f"Warning: {model_path} not found. Skipping.")
-            continue
-        
-        # Output paths for normal and quantized models
-        tflite_path = os.path.join(OUTPUT_DIR, f"{model_name}_model.tflite")
-        quant_tflite_path = os.path.join(OUTPUT_DIR, f"{model_name}_model_quant.tflite")
-        
-        # Convert to TFLite (without quantization)
-        print(f"\nConverting {model_name} model to TFLite...")
-        model_size = convert_model_to_tflite(model_path, tflite_path, quantize=False)
-        results[model_name] = {'normal_size': model_size}
-        
-        # Convert with quantization if enabled
-        if QUANTIZE:
-            print(f"\nConverting {model_name} model to quantized TFLite...")
-            quant_model_size = convert_model_to_tflite(model_path, quant_tflite_path, quantize=True)
-            results[model_name]['quantized_size'] = quant_model_size
-            results[model_name]['size_reduction'] = (model_size - quant_model_size) / model_size * 100
+    # Create output directory if it doesn't exist
+    output_dir = os.path.dirname(args.output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
     
-    # Print comparison table
-    print("\nModel Size Comparison:")
-    print("=" * 60)
-    print(f"{'Model':<15} {'Normal (MB)':<15} {'Quantized (MB)':<15} {'Reduction (%)':<15}")
-    print("-" * 60)
+    # Convert model
+    convert_model_to_tflite(args.model_path, args.output_path, args.quantize)
     
-    for model_name, result in results.items():
-        normal_size = result.get('normal_size', 0)
-        quant_size = result.get('quantized_size', 0)
-        reduction = result.get('size_reduction', 0)
-        
-        print(f"{model_name:<15} {normal_size:<15.2f} {quant_size:<15.2f} {reduction:<15.2f}")
-    
-    # Plot size comparison
-    plt.figure(figsize=(10, 6))
-    
-    models_list = list(results.keys())
-    normal_sizes = [results[m].get('normal_size', 0) for m in models_list]
-    quant_sizes = [results[m].get('quantized_size', 0) for m in models_list]
-    
-    x = np.arange(len(models_list))
-    width = 0.35
-    
-    plt.bar(x - width/2, normal_sizes, width, label='Normal')
-    plt.bar(x + width/2, quant_sizes, width, label='Quantized')
-    
-    plt.xlabel('Model')
-    plt.ylabel('Size (MB)')
-    plt.title('Model Size Comparison')
-    plt.xticks(x, models_list)
-    plt.legend()
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'model_size_comparison.png'))
-    
-    print(f"\nConversion complete! TFLite models saved to '{OUTPUT_DIR}' directory.")
+    print("\nConversion complete!")
+    print("To use this model in React Native with TensorFlow.js:")
+    print("1. Make sure the TensorFlow.js package is installed")
+    print("2. Load the model using tf.loadTFLiteModel() function")
+    print("3. Preprocess input images to match the model's expected format")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -10,10 +10,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
     "expo": "^52.0.42",
     "expo-camera": "^16.0.18",
     "expo-face-detector": "^13.0.2",
+    "expo-file-system": "^18.0.12",
     "expo-status-bar": "^2.0.1",
+    "fs-extra": "^11.3.0",
+    "jimp": "^1.6.0",
     "react": "^19.1.0",
     "react-native": "^0.78.1",
     "react-native-safe-area-context": "^5.3.0"

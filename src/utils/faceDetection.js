@@ -2,6 +2,9 @@
  * Utility functions for face detection and processing
  * These are placeholder implementations that will be replaced with TensorFlow.js code
  */
+import * as tf from '@tensorflow/tfjs';
+import * as FileSystem from 'expo-file-system';
+import Jimp from 'jimp';
 
 /**
  * Process a captured image through the TensorFlow models
@@ -11,36 +14,54 @@
  * @returns {Object} Results with age, gender, expression and inference time
  */
 export const processImage = async (photo, face, models) => {
-  console.log('Processing image for face analysis');
+  console.log('Processing image through models...');
   
   try {
-    const startTime = Date.now();
+    // Start timing
+    const startTime = performance.now();
     
-    // In a real implementation:
-    // 1. Crop the face from the image
-    const croppedFace = await cropFaceFromImage(photo, face);
+    // Crop the face from the image
+    const processedImage = await cropFaceFromImage(photo, face);
     
-    // 2. Prepare the face image as tensor for model input
-    const tensor = await imageToTensor(croppedFace.uri);
+    // Convert image to tensor
+    const tensor = await imageToTensor(processedImage.uri);
     
-    // 3. Run inferences on the three models
-    const ageResult = await predictAge(tensor, models?.age);
-    const genderResult = await predictGender(tensor, models?.gender);
-    const expressionResult = await predictExpression(tensor, models?.expression);
+    // Run predictions
+    console.log('Running predictions...');
+    const ageResult = await predictAge(tensor, models.age);
+    const genderResult = await predictGender(tensor, models.gender);
+    const expressionResult = await predictExpression(tensor, models.expression);
     
-    // 4. Calculate processing time
-    const processingTime = Date.now() - startTime;
+    // End timing
+    const endTime = performance.now();
+    const processingTime = endTime - startTime;
     
-    // 5. Format results for display
+    console.log('Prediction complete:', {
+      age: ageResult.ageRange,
+      gender: genderResult.gender,
+      expression: expressionResult.expression,
+      processingTime
+    });
+    
+    // Clean up tensors
+    tf.dispose(tensor);
+    
+    // Return results
     return {
-      age: `${ageResult.ageClass} (${(ageResult.confidence * 100).toFixed(1)}%)`,
-      gender: `${genderResult.gender} (${(genderResult.confidence * 100).toFixed(1)}%)`,
-      expression: `${expressionResult.expression} (${(expressionResult.confidence * 100).toFixed(1)}%)`,
-      processingTime: processingTime
+      age: ageResult,
+      gender: genderResult,
+      expression: expressionResult,
+      processingTime,
+      faceCoordinates: {
+        x: face.bounds.origin.x,
+        y: face.bounds.origin.y,
+        width: face.bounds.size.width,
+        height: face.bounds.size.height,
+      },
     };
   } catch (error) {
-    console.error('Error processing face image:', error);
-    throw new Error('Face processing failed: ' + error.message);
+    console.error('Error processing image:', error);
+    throw error;
   }
 };
 
@@ -51,10 +72,49 @@ export const processImage = async (photo, face, models) => {
  * @returns {Object} Processed image data
  */
 export const cropFaceFromImage = async (photo, face) => {
-  // This would use image manipulation libraries
-  // For now, just log and return the photo
-  console.log('Cropping face from image');
-  return photo;
+  try {
+    // Get face bounds
+    const { origin, size } = face.bounds;
+    
+    // Add padding around the face (20%)
+    const padding = {
+      x: size.width * 0.2,
+      y: size.height * 0.2,
+    };
+    
+    // Calculate crop dimensions
+    const cropX = Math.max(0, origin.x - padding.x);
+    const cropY = Math.max(0, origin.y - padding.y);
+    const cropWidth = Math.min(photo.width - cropX, size.width + padding.x * 2);
+    const cropHeight = Math.min(photo.height - cropY, size.height + padding.y * 2);
+    
+    // Create temporary file path for cropped image
+    const tempUri = FileSystem.cacheDirectory + 'cropped_face.jpg';
+    
+    // Use Jimp to crop the image
+    const image = await Jimp.read(photo.uri);
+    image
+      .crop(cropX, cropY, cropWidth, cropHeight)
+      .resize(224, 224) // Resize to model input size
+      .quality(90);
+    
+    // Save the cropped image
+    const buffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+    await FileSystem.writeAsStringAsync(tempUri, buffer.toString('base64'), {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    // Return the cropped image info
+    return {
+      uri: tempUri,
+      width: 224,
+      height: 224,
+    };
+  } catch (error) {
+    console.error('Error cropping face from image:', error);
+    // If cropping fails, return the original photo
+    return photo;
+  }
 };
 
 /**
@@ -63,13 +123,31 @@ export const cropFaceFromImage = async (photo, face) => {
  * @returns {tf.Tensor3D} Tensor representation of the image
  */
 export const imageToTensor = async (uri) => {
-  // This would load the image, convert to tensor, resize and normalize
-  console.log('Converting image to tensor');
-  
-  // Mock tensor return
-  return {
-    shape: [1, 224, 224, 3],
-  };
+  try {
+    // Read image file
+    const imgB64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    
+    // Load the image
+    const imgBuffer = tf.util.encodeString(imgB64, 'base64').buffer;
+    const raw = new Uint8Array(imgBuffer);
+    
+    // Decode and convert to tensor
+    const imageTensor = tf.node
+      ? tf.node.decodeImage(raw)
+      : tf.browser.fromPixels(
+          await createImageBitmap(new Blob([raw], { type: 'image/jpeg' }))
+        );
+    
+    return imageTensor;
+  } catch (error) {
+    console.error('Error converting image to tensor:', error);
+    
+    // Fallback: create a placeholder tensor of the right shape
+    // This should be replaced with proper error handling in production
+    return tf.zeros([224, 224, 3]);
+  }
 };
 
 /**
@@ -79,29 +157,50 @@ export const imageToTensor = async (uri) => {
  * @returns {Object} Age prediction and confidence
  */
 export const predictAge = async (tensor, model) => {
-  console.log('Running age prediction');
-  
-  // Age ranges that correspond to our model's output classes
-  const ageRanges = [
-    '0-3',
-    '4-7',
-    '8-15',
-    '16-24',
-    '25-32',
-    '33-45',
-    '46-60',
-    '60+'
-  ];
-  
-  // Mock prediction - in a real app this would come from the model
-  const classIndex = 4; // Corresponds to 25-32 age range
-  const confidence = 0.85;
-  
-  return {
-    ageClass: ageRanges[classIndex],
-    confidence: confidence,
-    rawOutput: [0.03, 0.07, 0.12, 0.25, 0.85, 0.1, 0.05, 0.02]
-  };
+  try {
+    if (!model) {
+      throw new Error('Age model not loaded');
+    }
+    
+    // Clone the tensor to avoid issues with multiple model runs
+    const input = tensor.clone();
+    
+    // Run prediction using the TensorFlow model hook
+    const prediction = await model.predict(input);
+    
+    // Process the prediction result
+    // Age ranges: '0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61+'
+    const ageRanges = ['0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61+'];
+    
+    // Get prediction as array
+    const predictionArray = await prediction.data();
+    
+    // Find max confidence and corresponding age range
+    let maxConfidence = 0;
+    let maxIndex = 0;
+    
+    for (let i = 0; i < predictionArray.length; i++) {
+      if (predictionArray[i] > maxConfidence) {
+        maxConfidence = predictionArray[i];
+        maxIndex = i;
+      }
+    }
+    
+    // Clean up tensors
+    input.dispose();
+    prediction.dispose();
+    
+    return {
+      ageRange: ageRanges[maxIndex],
+      confidence: maxConfidence,
+    };
+  } catch (error) {
+    console.error('Error predicting age:', error);
+    return {
+      ageRange: 'Unknown',
+      confidence: 0,
+    };
+  }
 };
 
 /**
@@ -111,14 +210,40 @@ export const predictAge = async (tensor, model) => {
  * @returns {Object} Gender prediction and confidence
  */
 export const predictGender = async (tensor, model) => {
-  console.log('Running gender prediction');
-  
-  // Mock prediction
-  return {
-    gender: 'male', // 0: female, 1: male
-    confidence: 0.92,
-    rawOutput: [0.08, 0.92]
-  };
+  try {
+    if (!model) {
+      throw new Error('Gender model not loaded');
+    }
+    
+    // Clone the tensor to avoid issues with multiple model runs
+    const input = tensor.clone();
+    
+    // Run prediction using the TensorFlow model hook
+    const prediction = await model.predict(input);
+    
+    // Get prediction as array - gender is binary classification (0 = Male, 1 = Female)
+    const predictionArray = await prediction.data();
+    const maleConfidence = predictionArray[0];
+    const femaleConfidence = predictionArray[1];
+    
+    const gender = maleConfidence > femaleConfidence ? 'Male' : 'Female';
+    const confidence = gender === 'Male' ? maleConfidence : femaleConfidence;
+    
+    // Clean up tensors
+    input.dispose();
+    prediction.dispose();
+    
+    return {
+      gender,
+      confidence,
+    };
+  } catch (error) {
+    console.error('Error predicting gender:', error);
+    return {
+      gender: 'Unknown',
+      confidence: 0,
+    };
+  }
 };
 
 /**
@@ -128,28 +253,47 @@ export const predictGender = async (tensor, model) => {
  * @returns {Object} Expression prediction and confidence
  */
 export const predictExpression = async (tensor, model) => {
-  console.log('Running expression prediction');
-  
-  // Expression classes that correspond to our model's output
-  const expressions = [
-    'angry',
-    'disgust',
-    'fear',
-    'happy',
-    'sad',
-    'surprise',
-    'neutral'
-  ];
-  
-  // Mock prediction for expressions
-  // Classes: 0=angry, 1=disgust, 2=fear, 3=happy, 4=sad, 5=surprise, 6=neutral
-  const classIndex = 3; // Happy
-  const confidence = 0.78;
-  const rawOutput = [0.03, 0.02, 0.05, 0.78, 0.04, 0.03, 0.05];
-  
-  return {
-    expression: expressions[classIndex], 
-    confidence: confidence,
-    rawOutput: rawOutput
-  };
+  try {
+    if (!model) {
+      throw new Error('Expression model not loaded');
+    }
+    
+    // Clone the tensor to avoid issues with multiple model runs
+    const input = tensor.clone();
+    
+    // Run prediction using the TensorFlow model hook
+    const prediction = await model.predict(input);
+    
+    // Process the result
+    const expressions = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprised', 'Neutral'];
+    
+    // Get prediction as array
+    const predictionArray = await prediction.data();
+    
+    // Find max confidence and corresponding expression
+    let maxConfidence = 0;
+    let maxIndex = 0;
+    
+    for (let i = 0; i < predictionArray.length; i++) {
+      if (predictionArray[i] > maxConfidence) {
+        maxConfidence = predictionArray[i];
+        maxIndex = i;
+      }
+    }
+    
+    // Clean up tensors
+    input.dispose();
+    prediction.dispose();
+    
+    return {
+      expression: expressions[maxIndex],
+      confidence: maxConfidence,
+    };
+  } catch (error) {
+    console.error('Error predicting expression:', error);
+    return {
+      expression: 'Unknown',
+      confidence: 0,
+    };
+  }
 };

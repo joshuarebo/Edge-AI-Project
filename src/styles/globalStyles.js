@@ -4,55 +4,99 @@ import { StyleSheet } from 'react-native';
  * Global color palette
  */
 export const colors = {
-  primary: '#4630EB',
-  secondary: '#2c3e50',
-  success: '#27ae60',
-  warning: '#f39c12',
-  danger: '#e74c3c',
-  info: '#3498db',
-  light: '#f5f5f5',
-  dark: '#333333',
-  white: '#ffffff',
-  black: '#000000',
-  gray: {
-    100: '#f7fafc',
-    200: '#edf2f7',
-    300: '#e2e8f0',
-    400: '#cbd5e0',
-    500: '#a0aec0',
-    600: '#718096',
-    700: '#4a5568',
-    800: '#2d3748',
-    900: '#1a202c'
-  }
+  // Primary color and variants
+  primary: '#5C6BC0',     // Indigo 400
+  primaryLight: '#8E99F3',
+  primaryDark: '#26418F',
+  
+  // Accent color
+  accent: '#FFD54F',      // Amber 300
+  
+  // Backgrounds
+  background: '#FFFFFF',
+  card: '#F5F5F5',
+  
+  // Text
+  text: '#212121',
+  textLight: '#757575',
+  
+  // Status
+  success: '#66BB6A',     // Green 400
+  warning: '#FFA726',     // Orange 400
+  error: '#EF5350',       // Red 400
+  info: '#29B6F6',        // Light Blue 400
+  
+  // UI Elements
+  border: '#E0E0E0',
+  shadow: 'rgba(0, 0, 0, 0.1)',
+  
+  // Expression colors
+  happy: '#4CAF50',       // Green 500
+  sad: '#5C6BC0',         // Indigo 400
+  angry: '#F44336',       // Red 500
+  surprised: '#FFEB3B',   // Yellow 500
+  fear: '#9C27B0',        // Purple 500
+  disgust: '#795548',     // Brown 500
+  neutral: '#9E9E9E',     // Gray 500
+  
+  // Gender colors
+  male: '#42A5F5',        // Blue 400
+  female: '#EC407A',      // Pink 400
+  
+  // Age group colors
+  child: '#FFEB3B',       // Yellow 500
+  teen: '#26C6DA',        // Cyan 400
+  young: '#66BB6A',       // Green 400
+  adult: '#5C6BC0',       // Indigo 400
+  senior: '#8D6E63',      // Brown 400
 };
 
 /**
  * Typography styles
  */
 export const typography = {
-  fontSizes: {
-    xs: 12,
-    sm: 14,
-    md: 16,
-    lg: 18,
-    xl: 20,
-    '2xl': 24,
-    '3xl': 30,
-    '4xl': 36,
-    '5xl': 48
+  h1: {
+    fontSize: 28,
+    fontWeight: 'bold',
   },
-  fontWeights: {
-    hairline: '100',
-    thin: '200',
-    light: '300',
-    normal: '400',
-    medium: '500',
-    semibold: '600',
-    bold: '700',
-    extrabold: '800',
-    black: '900'
-  }
+  h2: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  h3: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  h4: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  subtitle1: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  subtitle2: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  body1: {
+    fontSize: 16,
+  },
+  body2: {
+    fontSize: 14,
+  },
+  button: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  caption: {
+    fontSize: 12,
+  },
+  overline: {
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
 };
 
 /**
@@ -64,8 +108,7 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
-  '2xl': 48,
-  '3xl': 64
+  xxl: 48,
 };
 
 /**
@@ -73,59 +116,42 @@ export const spacing = {
  */
 export const layout = {
   borderRadius: {
-    sm: 4,
-    md: 8,
-    lg: 16,
-    full: 9999
+    small: 4,
+    medium: 8,
+    large: 16,
+    pill: 24,
   },
-  zIndex: {
-    hide: -1,
-    auto: 'auto',
-    base: 0,
-    docked: 10,
-    dropdown: 1000,
-    sticky: 1100,
-    banner: 1200,
-    overlay: 1300,
-    modal: 1400,
-    popover: 1500,
-    toast: 1700,
-    tooltip: 1800
-  }
+  maxWidth: {
+    container: 1200,
+    content: 960,
+  },
 };
 
 /**
  * Shadow styles
  */
 export const shadows = {
-  sm: {
-    shadowColor: '#000',
+  small: {
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
-    shadowRadius: 1.0,
-    elevation: 1
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
-  md: {
-    shadowColor: '#000',
+  medium: {
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
-    elevation: 4
+    elevation: 4,
   },
-  lg: {
-    shadowColor: '#000',
+  large: {
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.30,
+    shadowOpacity: 0.3,
     shadowRadius: 4.65,
-    elevation: 8
+    elevation: 8,
   },
-  xl: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.41,
-    shadowRadius: 9.11,
-    elevation: 14
-  }
 };
 
 /**
@@ -134,43 +160,63 @@ export const shadows = {
 export const commonStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light
+    backgroundColor: colors.background,
   },
-  center: {
+  centeredContainer: {
+    flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    padding: spacing.md,
   },
   row: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   card: {
-    ...shadows.md,
-    backgroundColor: colors.white,
-    borderRadius: layout.borderRadius.md,
-    padding: spacing.md
-  },
-  screenContainer: {
-    flex: 1,
+    backgroundColor: colors.card,
+    borderRadius: layout.borderRadius.medium,
     padding: spacing.md,
-    backgroundColor: colors.light
+    ...shadows.small,
   },
-  textInput: {
-    backgroundColor: colors.white,
-    borderRadius: layout.borderRadius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.gray[300]
+  loaderContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
   },
   button: {
     backgroundColor: colors.primary,
-    borderRadius: layout.borderRadius.md,
-    padding: spacing.md,
+    borderRadius: layout.borderRadius.medium,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center'
   },
   buttonText: {
-    color: colors.white,
-    fontWeight: typography.fontWeights.bold,
-    fontSize: typography.fontSizes.md
-  }
+    color: colors.background,
+    ...typography.button,
+  },
+  inputContainer: {
+    marginBottom: spacing.md,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: layout.borderRadius.medium,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: 16,
+  },
+  label: {
+    ...typography.subtitle2,
+    marginBottom: spacing.xs,
+    color: colors.text,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    marginTop: spacing.xs,
+  },
 });

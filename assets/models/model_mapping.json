@@ -1,0 +1,34 @@
+{
+  "modelPaths": {
+    "age": {
+      "model": "models/age/model.json",
+      "weights": "models/age/weights.bin",
+      "metadata": "models/age/metadata.json"
+    },
+    "gender": {
+      "model": "models/gender/model.json",
+      "weights": "models/gender/weights.bin",
+      "metadata": "models/gender/metadata.json"
+    },
+    "expression": {
+      "model": "models/expression/model.json",
+      "weights": "models/expression/weights.bin",
+      "metadata": "models/expression/metadata.json"
+    }
+  },
+  "versions": {
+    "age": "1.0.0",
+    "gender": "1.0.0",
+    "expression": "1.0.0"
+  },
+  "classes": {
+    "age": ["0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61+"],
+    "gender": ["Male", "Female"],
+    "expression": ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprised", "Neutral"]
+  },
+  "inputSize": {
+    "age": 224,
+    "gender": 224,
+    "expression": 48
+  }
+}
