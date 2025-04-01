@@ -305,8 +305,8 @@
         // Load face-api models
         async function loadModels() {
             try {
-                // Specify the models to load
-                await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
+                // Specify the models to load - using SSD MobileNet instead of TinyFaceDetector for better accuracy
+                await faceapi.nets.ssdMobilenetv1.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
                 await faceapi.nets.ageGenderNet.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
                 await faceapi.nets.faceExpressionNet.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
                 
@@ -447,10 +447,13 @@
             detectInterval = setInterval(async () => {
                 if (video.readyState === 4) {
                     try {
-                        // Detect faces
+                        // Detect faces using SSD MobileNet for better detection
                         const detections = await faceapi.detectAllFaces(
-                            video, 
-                            new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 })
+                            video,
+                            new faceapi.SsdMobilenetv1Options({ 
+                                minConfidence: 0.1,  // Very low confidence threshold to detect even in poor lighting
+                                maxResults: 5       // Look for multiple faces but limit results
+                            })
                         )
                         .withAgeAndGender()
                         .withFaceExpressions();
@@ -490,7 +493,7 @@
                         // Continue running even if there's an error
                     }
                 }
-            }, 100);
+            }, 300); // Increased interval for better performance
         }
         
         // Capture image and process it
