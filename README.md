@@ -13,7 +13,7 @@ Access the live demo on Replit: [Face Analysis App](https://Edge-AI-Project.josh
 - **Performance Metrics**: Displays processing time and model accuracy
 - **Mobile Optimization**: Works on both desktop and mobile devices
 - **Camera Controls**: Switch between front and back cameras on mobile
-- **QR Code Sharing**: Easily share the app via scannable QR code
+
 
 ## Technology Stack
 
@@ -32,13 +32,7 @@ Access the live demo on Replit: [Face Analysis App](https://Edge-AI-Project.josh
 
 ## How to Access
 
-### Option 1: Direct URL
 Visit [https://Edge-AI-Project.joshuarebo.repl.co](https://Edge-AI-Project.joshuarebo.repl.co) in your browser.
-
-### Option 2: QR Code (Recommended for Mobile)
-1. Visit [https://Edge-AI-Project.joshuarebo.repl.co/qrcode.html](https://Edge-AI-Project.joshuarebo.repl.co/qrcode.html)
-2. Scan the QR code with your mobile device
-3. The app will open in your mobile browser
 
 ## How to Use
 
