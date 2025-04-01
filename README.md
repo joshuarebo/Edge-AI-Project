@@ -139,7 +139,7 @@ For deploying to GitHub Pages:
 - Image processing: ~300-400ms
 - Total processing time: ~350-450ms
 - Memory usage: ~200-300MB
-- CPU utilization: 30-40% on average
+- CPU utilization: 30-40%+ on average
 
 ### Training Datasets
 - **Adience**: 
