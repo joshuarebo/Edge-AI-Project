@@ -1,0 +1,13 @@
+Model,Metric,Value (%),Sample Size,Description
+Age Recognition,Accuracy,85.0,20 images,Percentage of correctly classified age categories
+Age Recognition,Precision,85.35,20 images,Ability to correctly identify age categories without false positives
+Age Recognition,Recall,85.0,20 images,Ability to find all instances of each age category
+Age Recognition,F1 Score,84.96,20 images,Harmonic mean of precision and recall for age detection
+Gender Recognition,Accuracy,90.0,20 images,Percentage of correctly classified genders
+Gender Recognition,Precision,90.0,20 images,Ability to correctly identify genders without false positives
+Gender Recognition,Recall,90.0,20 images,Ability to find all instances of each gender
+Gender Recognition,F1 Score,90.0,20 images,Harmonic mean of precision and recall for gender detection
+Expression Recognition,Accuracy,85.0,20 images,Percentage of correctly classified expressions
+Expression Recognition,Precision,100.0,20 images,Ability to correctly identify expressions without false positives
+Expression Recognition,Recall,85.0,20 images,Ability to find all instances of each expression
+Expression Recognition,F1 Score,91.18,20 images,Harmonic mean of precision and recall for expression detection
